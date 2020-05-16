@@ -20,20 +20,26 @@ from draw import *
   ==================== """
 def first_pass( commands ):
 
-    name = 'xfile'
+    name = None
     num_frames = 1
-    
-    command_list = [command['op'] for command in commands]
-    print(command_list)
-    if 'vary' in command_list and 'frames' not in command_list:
-        print('Found vary, missing frames')
+
+    vary = False
+
+
+    for command in commands:
+        if command['op'] == 'vary':
+            vary = True
+        elif command['op'] == 'frames':
+            num_frames = command['args'][0]
+        elif command['op'] == 'basename':
+            name = command['args'][0]
+    if vary and num_frames == 1:
+        print('Found vary, but not frames')
         exit()
-    if 'frames' in command_list:
-        num_frames = commands[command_list.index('frames')]['args'][0]
-        if 'basename' not in command_list:
-            print('Basename not found, setting name value to xfile')
-        else:
-            name = commands[command_list.index('basename')]['args'][0]
+    if num_frames > 1 and not name:
+        print('Frames found, but basename not found')
+        name = 'xfile'
+
     return (name, num_frames)
 
 """======== second_pass( commands ) ==========
@@ -64,8 +70,8 @@ def second_pass( commands, num_frames ):
             for knob in frames:
                 knob[command['knob']] = value
                 value += step
-                print(knob[command['knob']])
-                print(step)
+                #print(knob[command['knob']])
+                #print(step)
     return frames
 
 
@@ -280,7 +286,7 @@ def run(filename):
                     stack.pop()
                 
             save_extension(screen, "anim/" + name + "%03d" % i + '.png')
-            print("anim/" + name + "%03d" % i + '.png')
+            print("Saved frame " + str(i))
         make_animation(name)
 
         # end operation loop
