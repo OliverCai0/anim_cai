@@ -1,4 +1,5 @@
 import mdl
+import copy
 from display import *
 from matrix import *
 from draw import *
@@ -25,14 +26,16 @@ def first_pass( commands ):
 
     vary = False
 
-
-    for command in commands:
+    c_commands = copy.deepcopy(commands)
+    for command in c_commands:
         if command['op'] == 'vary':
             vary = True
         elif command['op'] == 'frames':
             num_frames = command['args'][0]
+            commands.remove(command)
         elif command['op'] == 'basename':
             name = command['args'][0]
+            commands.remove(command)
     if vary and num_frames == 1:
         print('Found vary, but not frames')
         exit()
@@ -61,7 +64,8 @@ def first_pass( commands ):
   ===================="""
 def second_pass( commands, num_frames ):
     frames = [ {} for i in range(int(num_frames)) ]
-    for command in commands:
+    c_commands = copy.deepcopy(commands)
+    for command in c_commands:
         if command['op'] == 'vary':
             
             step = (command['args'][3] - command['args'][2]) / len(frames)
@@ -72,6 +76,7 @@ def second_pass( commands, num_frames ):
                 value += step
                 #print(knob[command['knob']])
                 #print(step)
+            commands.remove(command)
     return frames
 
 
@@ -122,6 +127,8 @@ def run(filename):
     consts = ''
     coords = []
     coords1 = []
+
+    #print(commands)
 
     if len(frames) == 1:
         for command in commands:
